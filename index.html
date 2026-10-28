@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soft Reset</title>
+<style>
+:root{--bg:#f8e9ea;--card:#fff;--ink:#3b2224;--mut:#8a6468;--pink:#e58a96;--soft:#f3cfd3;--line:#ecd2d5;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#2a1b1d;--card:#3a2629;--ink:#f6e6e8;--mut:#c9a4a9;--soft:#4a3033;--line:#54383c}}
+:root[data-theme="dark"]{--bg:#2a1b1d;--card:#3a2629;--ink:#f6e6e8;--mut:#c9a4a9;--soft:#4a3033;--line:#54383c}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif;line-height:1.6}
+main{max-width:560px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:26px;margin:8px 0 4px;text-align:center}
+.sub{text-align:center;color:var(--mut);margin:0 0 16px}
+.langs{display:flex;justify-content:center;gap:6px;margin-bottom:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px}
+label{display:block;font-weight:600;margin:12px 0 6px}
+input[type=text],select{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:16px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--pink);border-color:var(--pink);color:#fff}
+.row{display:flex;gap:10px}.row>div{flex:1}
+button.go{width:100%;margin-top:18px;padding:14px;border:0;border-radius:14px;background:var(--pink);color:#fff;font-size:17px;font-weight:700;cursor:pointer}
+button.go:disabled{opacity:.6}
+.err{color:#c0392b;margin-top:10px;font-size:14px}
+.stats{display:flex;gap:10px;margin:8px 0}
+.stat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;font-size:13px;color:var(--mut)}
+.stat b{display:block;font-size:20px;color:var(--ink)}
+.bar{height:8px;background:var(--soft);border-radius:8px;overflow:hidden;margin:8px 0 16px}
+.bar i{display:block;height:100%;background:var(--pink);width:0;transition:width .3s}
+.day{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:10px;overflow:hidden}
+.day summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px;cursor:pointer;font-weight:700}
+.day summary::-webkit-details-marker{display:none}
+.badge{background:var(--soft);border-radius:10px;padding:2px 10px;font-size:13px;white-space:nowrap}
+.body{padding:0 14px 14px}
+.sec{font-size:13px;color:var(--mut);margin:12px 0 4px;font-weight:700}
+a.vid{display:flex;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;background:var(--bg);color:var(--ink);text-decoration:none;margin-bottom:6px;font-size:15px}
+a.vid .t{unicode-bidi:plaintext;text-align:start}
+a.vid .m{color:var(--pink);white-space:nowrap;font-weight:600}
+.hab{display:flex;align-items:center;gap:8px;margin:4px 0}
+.water{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.cup{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-size:16px;cursor:pointer;padding:0}
+.cup.on{background:var(--soft)}
+.quote{margin-top:12px;color:var(--mut);font-style:italic}
+.done{display:flex;align-items:center;gap:8px;margin-top:14px;font-weight:700}
+.note{font-size:12px;color:var(--mut);text-align:center;margin-top:18px}
+.hide{display:none}
+</style>
+</head>
+<body>
+<main>
+<div class="langs" id="langs"></div>
+<h1>🎀 Soft Reset</h1>
+<p class="sub" id="sub"></p>
+
+<section class="card" id="form">
+  <label for="ch" id="l_ch"></label>
+  <input type="text" id="ch" dir="auto" autocomplete="off">
+  <label id="l_type"></label>
+  <div class="chips" id="types"></div>
+  <div class="row">
+    <div><label for="lvl" id="l_lvl"></label><select id="lvl"></select></div>
+    <div><label for="days" id="l_days"></label><select id="days"><option>7</option><option>10</option><option selected>15</option><option>21</option><option>30</option></select></div>
+    <div><label for="min" id="l_min"></label><select id="min"><option>15</option><option selected>30</option><option>45</option><option>60</option></select></div>
+  </div>
+  <button class="go" id="go"></button>
+  <div class="err hide" id="err"></div>
+</section>
+
+<section class="hide" id="out">
+  <h2 id="ptitle" style="margin:6px 0" dir="auto"></h2>
+  <div class="stats"><div class="stat"><b id="s1">0</b><span id="t1"></span></div><div class="stat"><b id="s2">0</b><span id="t2"></span></div><div class="stat"><b id="s3">0</b><span id="t3"></span></div></div>
+  <div class="bar"><i id="barfill"></i></div>
+  <div id="list"></div>
+  <button class="go" id="again" style="background:var(--soft);color:var(--ink)"></button>
+</section>
+<p class="note" id="note"></p>
+</main>
+
+<script>
+const L={
+ar:{dir:"rtl",name:"العربية",gen:"Arabic (simple, friendly Moroccan-style Modern Standard)",
+ sub:"كتبي اسم القناة ونوع البرنامج، وكنصاوبو ليك برنامج نهار بنهار",ch:"اسم القناة على يوتيوب",chp:"مثلا: Move With Nicole",type:"نوع البرنامج",lvl:"المستوى",days:"الأيام",min:"دقائق",
+ go:"صاوب لي البرنامج ✨",busy:"كنصاوب البرنامج…",again:"برنامج جديد",done:"كملت هاد النهار ✔",habits:"🎀 عادات اليوم",water:"💧 الماء (كاسات)",
+ d1:"أيام مكتملة",d2:"سلسلة متتالية",d3:"كاسات ماء",day:"نهار",empty:"كتبي اسم القناة أولا",fail:"وقع مشكل، عاودي حاولي",
+ note:"هادا برنامج للياقة العامة وماشي نصيحة طبية. استشيري طبيب قبل ما تبدّي إلا كنتي حامل أو عندك إصابة أو مرض مزمن. الروابط كتفتح نتائج البحث ديال يوتيوب على الفيديو المقترح.",
+ lv:["مبتدئة","متوسطة"],tp:["Pilates","Yoga","تمارين الجسم كامل","البطن والكور","الساقين والمؤخرة","تمدد ومرونة","كارديو خفيف","رقص رياضي"]},
+fr:{dir:"ltr",name:"Français",gen:"French",
+ sub:"Entre ta chaîne YouTube et le type de programme, on te prépare le plan jour par jour",ch:"Nom de la chaîne YouTube",chp:"ex. : Move With Nicole",type:"Type de programme",lvl:"Niveau",days:"Jours",min:"Minutes",
+ go:"Créer mon programme ✨",busy:"Création en cours…",again:"Nouveau programme",done:"Journée terminée ✔",habits:"🎀 Habitudes du jour",water:"💧 Eau (verres)",
+ d1:"jours terminés",d2:"jours d’affilée",d3:"verres d’eau",day:"Jour",empty:"Entre d’abord le nom d’une chaîne",fail:"Un problème est survenu, réessaie",
+ note:"Ce programme est un guide de forme générale, pas un avis médical. Consulte un médecin avant de commencer si tu es enceinte, blessée ou atteinte d’une maladie chronique. Les liens ouvrent une recherche YouTube sur la vidéo proposée.",
+ lv:["Débutante","Intermédiaire"],tp:["Pilates","Yoga","Full body","Abdos & gainage","Jambes & fessiers","Étirements & mobilité","Cardio doux","Danse fitness"]},
+en:{dir:"ltr",name:"English",gen:"English",
+ sub:"Enter your YouTube channel and program type, and get a day-by-day plan",ch:"YouTube channel name",chp:"e.g. Move With Nicole",type:"Program type",lvl:"Level",days:"Days",min:"Minutes",
+ go:"Build my program ✨",busy:"Building…",again:"New program",done:"Day completed ✔",habits:"🎀 Today’s habits",water:"💧 Water (glasses)",
+ d1:"days done",d2:"day streak",d3:"glasses of water",day:"Day",empty:"Enter a channel name first",fail:"Something went wrong, try again",
+ note:"This program is a general fitness guide, not medical advice. Check with a doctor first if you are pregnant, injured or have a chronic condition. Links open a YouTube search for the suggested video.",
+ lv:["Beginner","Intermediate"],tp:["Pilates","Yoga","Full body","Abs & core","Legs & glutes","Stretching & mobility","Low-impact cardio","Dance workout"]}};
+const TV=["Pilates","Yoga","Full body workout","Abs & core","Legs & glutes","Stretching & mobility","Cardio low impact","Dance workout"],LV=["beginner","intermediate"];
+const $=id=>document.getElementById(id),KEY="softreset-v2";
+let lang="ar",ti=0,plan=null,st={done:{},water:{},hab:{}};
+function save(){try{localStorage.setItem(KEY,JSON.stringify({lang,plan,st}))}catch(e){}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){return null}}
+const T=()=>L[lang];
+
+function ui(){
+  const t=T();document.documentElement.lang=lang;document.documentElement.dir=t.dir;
+  $("sub").textContent=t.sub;$("l_ch").textContent=t.ch;$("ch").placeholder=t.chp;$("l_type").textContent=t.type;$("l_lvl").textContent=t.lvl;$("l_days").textContent=t.days;$("l_min").textContent=t.min;
+  $("go").textContent=t.go;$("again").textContent=t.again;$("note").textContent=t.note;$("t1").textContent=t.d1;$("t2").textContent=t.d2;$("t3").textContent=t.d3;
+  const lv=$("lvl"),cur=lv.selectedIndex<0?0:lv.selectedIndex;lv.textContent="";t.lv.forEach((x,i)=>{const o=document.createElement("option");o.textContent=x;o.value=i;lv.appendChild(o)});lv.selectedIndex=cur;
+  $("types").textContent="";t.tp.forEach((x,i)=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=x;b.setAttribute("aria-pressed",i===ti);b.onclick=()=>{ti=i;[...$("types").children].forEach(c=>c.setAttribute("aria-pressed",c===b))};$("types").appendChild(b)});
+  $("langs").textContent="";Object.keys(L).forEach(k=>{const b=document.createElement("button");b.className="chip";b.textContent=L[k].name;b.setAttribute("aria-pressed",k===lang);b.onclick=()=>{lang=k;ui();if(plan)render();save()};$("langs").appendChild(b)});
+}
+const sq=(ch,t)=>"https://www.youtube.com/results?search_query="+encodeURIComponent(ch+" "+t);
+function vid(v){const a=document.createElement("a");a.className="vid";a.target="_blank";a.rel="noopener";a.href=sq(plan.channel,v.title);
+  const t=document.createElement("span");t.className="t";t.textContent=v.title;const m=document.createElement("span");m.className="m";m.textContent="▶ "+v.min+" min";a.append(t,m);return a}
+function sec(x){const d=document.createElement("div");d.className="sec";d.textContent=x;return d}
+
+function render(){
+  const t=T();$("form").classList.add("hide");$("out").classList.remove("hide");$("ptitle").textContent=plan.title;
+  const list=$("list");list.textContent="";
+  plan.days.forEach((d,i)=>{
+    const det=document.createElement("details");det.className="day";
+    const s=document.createElement("summary"),b=document.createElement("span");b.className="badge";b.textContent=t.day+" "+d.day;
+    const f=document.createElement("span");f.textContent=d.focus;f.style.flex="1";const ck=document.createElement("span");ck.id="ck"+i;s.append(b,f,ck);det.appendChild(s);
+    const body=document.createElement("div");body.className="body";
+    if(d.warmup)body.append(sec("Warm Up"),vid(d.warmup));
+    if(d.main&&d.main.length){body.appendChild(sec("Main Workout"));d.main.forEach(v=>body.appendChild(vid(v)))}
+    if(d.cooldown)body.append(sec("Cool Down"),vid(d.cooldown));
+    body.appendChild(sec(t.habits));
+    (d.habits||[]).forEach((h,j)=>{const l=document.createElement("label");l.className="hab";l.style.fontWeight="400";l.style.margin="4px 0";const c=document.createElement("input");c.type="checkbox";c.checked=!!st.hab[i+"_"+j];c.onchange=()=>{st.hab[i+"_"+j]=c.checked;save()};l.append(c,document.createTextNode(h));body.appendChild(l)});
+    body.appendChild(sec(t.water));const w=document.createElement("div");w.className="water";
+    for(let k=1;k<=8;k++){const c=document.createElement("button");c.className="cup"+((st.water[i]||0)>=k?" on":"");c.textContent="💧";c.onclick=()=>{st.water[i]=(st.water[i]||0)===k?k-1:k;save();[...w.children].forEach((x,n)=>x.className="cup"+(n<(st.water[i]||0)?" on":""));upd()};w.appendChild(c)}
+    body.appendChild(w);
+    const q=document.createElement("div");q.className="quote";q.textContent="✨ "+d.reminder;body.appendChild(q);
+    const lab=document.createElement("label");lab.className="done";const cb=document.createElement("input");cb.type="checkbox";cb.checked=!!st.done[i];cb.onchange=()=>{st.done[i]=cb.checked;save();upd()};lab.append(cb,document.createTextNode(t.done));body.appendChild(lab);
+    det.appendChild(body);list.appendChild(det);
+  });upd();
+}
+function upd(){
+  const n=plan.days.length;let c=0,run=0,best=0,cups=0;
+  plan.days.forEach((_,i)=>{const on=!!st.done[i];$("ck"+i).textContent=on?"✅":"";if(on){c++;run++;best=Math.max(best,run)}else run=0;cups+=st.water[i]||0});
+  $("s1").textContent=c+"/"+n;$("s2").textContent=best;$("s3").textContent=cups;$("barfill").style.width=(c/n*100)+"%";
+}
+async function gen(){
+  const t=T(),ch=$("ch").value.trim(),err=$("err");err.classList.add("hide");
+  if(!ch){err.textContent=t.empty;err.classList.remove("hide");return}
+  const n=+$("days").value,m=+$("min").value,lvl=LV[$("lvl").value||0],btn=$("go");btn.disabled=true;btn.textContent=t.busy;
+  try{
+    const sample=await claude.use("sample");if(!sample)throw new Error("unavailable");
+    const prompt=`You are a beginner-friendly fitness program planner. Build a ${n}-day "${TV[ti]}" program for a ${lvl} using videos from the YouTube channel "${ch}". About ${m} minutes of main workout per day.
+Return ONLY valid JSON, no markdown:
+{"title":"short program title","days":[{"day":1,"focus":"short focus","warmup":{"title":"video title","min":5},"main":[{"title":"video title","min":20}],"cooldown":{"title":"video title","min":10},"habits":["3 short healthy habits"],"reminder":"one short motivating sentence"}]}
+Rules: exactly ${n} days. Write title, focus, habits and reminder in ${t.gen}. Video titles stay in their original language and must be real, well-known titles from that channel only if you are confident; otherwise a short descriptive title that a YouTube search on that channel would find (never invent episode numbers). Vary workouts and progress gently. Put a rest or active-recovery day (main: [] with a walk or stretch as warmup/cooldown) about every 5th-6th day. No extreme diets, no weight-loss promises, no medical claims.`;
+    const r=await sample.json(prompt,{modelTier:"default",cache:false});
+    if(!r||!Array.isArray(r.days)||!r.days.length)throw new Error("bad");
+    plan={title:r.title||"Soft Reset",channel:ch,days:r.days};st={done:{},water:{},hab:{}};save();render();window.scrollTo(0,0);
+  }catch(e){err.textContent=t.fail;err.classList.remove("hide")}
+  btn.disabled=false;btn.textContent=t.go;
+}
+$("go").onclick=gen;
+$("again").onclick=()=>{plan=null;st={done:{},water:{},hab:{}};save();$("out").classList.add("hide");$("form").classList.remove("hide")};
+const old=load();if(old){if(L[old.lang])lang=old.lang}
+ui();
+if(old&&old.plan&&Array.isArray(old.plan.days)){plan=old.plan;st=old.st||st;render()}
+</script>
+</body>
+</html>
